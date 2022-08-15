@@ -1,0 +1,1199 @@
+---
+title: "STA380, Part 2: Exercises"
+author: "Shreyansh Agarawal (sa55742), Praneet Kumar Alamuri (pa22222), Maanvi Goyal (mg65952), Prathmesh Savale (ps33296)"
+date: '2022-08-15'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***Link to github repository - https://github.com/praths007/STA-380-Part2***
+
+## **Probability practice**\|**Part A**
+
+***Y*** = a visitor clicked Yes.
+
+***N*** = a visitor clicked No.
+
+***R*** = a visitor is a random clicker.
+
+***T*** = a visitor is a truthful clicker
+
+P(Y)= 0.65, P(N)= 0.35 , P(T)=0.7 , P(R)=0.3
+
+P(Y\|R)=0.5
+
+P(N\|R)=0.5
+
+As per the law of total probability:
+
+$$
+P(A)=P(A|B).P(B)+P(A|C).P(C)
+$$
+
+The probability of people who answered *'Yes'* can be calculated as:
+
+$$
+P(Y)=P(Y|T).P(T)+P(Y|R).P(R)
+$$
+
+$$
+0.65= P(Y∩T)+0.5*0.3
+$$
+
+$$
+0.5=P(Y∩T)
+$$
+
+Hence, there are [**50%**]{.underline} of the people who are truthful clickers and answered 'Yes'
+
+$$
+5/7=P(T|Y)
+$$ Hence, there are [**71.43%**]{.underline} of the people who are truthful clickers and given they answered 'Yes'
+
+## **Probability practice**\|**Part B**
+
+***P*** = a person has tested positive
+
+***N*** = a person has tested negative
+
+***D*** = a person has a disease
+
+***ND*** = a person does not has a disease
+
+P(D)= 0.000025, P(ND)= 0.999975 , P(P\|D)=0.993 , P(N\|ND)=0.9999
+
+$$
+P(P|ND)+ P(N|ND)=1
+$$
+
+P(P\|ND)=1-P(N\|ND)=1-0.9999
+
+P(P\|ND)=0.0001
+
+As per the law of total probability:
+
+$$
+P(A)=P(A|B).P(B)+P(A|C).P(C)
+$$
+
+The probability of people who are positive can be calculated as:
+
+$$
+P(P)=P(P|D).P(D)+P(P|ND).P(ND)
+$$
+
+$$
+P(P)= (0.993)(0.000025)+(0.0001)(0.999975)
+$$
+
+$$
+P(P)=0.00012482
+$$
+
+As per Naive Bayes Theorem:
+
+$$
+P(A|B)=[P(B|A).P(A)]/P(B)
+$$
+
+The probability of people who have disease when they tested positive is:
+
+$$
+P(D|P)=[P(P|D).P(D)]/P(P)
+$$
+
+$$
+P(D|P)= [(0.993)(0.000025)]/(0.00012482)
+$$
+
+$$
+P(D|P)=0.19888
+$$\
+Hence, the probability of people who have disease when they tested positive is [**19.88%**]{.underline}
+
+## **Wrangling the Billboard Top 100**\|**Part A**
+
+```{r echo=FALSE}
+billboard = read.csv(file="data/billboard.csv")
+```
+
+```{r echo=FALSE}
+#loading libraries
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(reshape))
+```
+
+```{r echo=FALSE}
+#taking countif on columns song & performer
+#arranging the count column in descending order
+sorted_table=billboard %>% group_by(song,performer) %>% summarise(count = n())%>% arrange(desc(count))
+```
+
+```{r echo=FALSE}
+print("Below table highlights the 10 most popular songs sung by various performers since 1958 on the Billboard Top 100")
+top_10_songs=head(sorted_table,n=10)
+top_10_songs
+```
+
+## **Wrangling the Billboard Top 100**\|**Part B**
+
+```{r echo=FALSE}
+#taking countif on columns song & performer
+#arranging the count column in descending order
+table_1=billboard %>% group_by(song,performer,year) %>% summarise(count = n())%>% arrange(desc(count))
+```
+
+```{r echo=FALSE}
+#counting the number of unique songs in each year
+#arranging them in descending order
+table_2=table_1 %>% group_by(year) %>% summarise(musical_diversity = n())%>% arrange(desc(musical_diversity))
+```
+
+```{r echo=FALSE}
+#filtering out years- 1958 and 2021 
+table_3= table_2 %>% filter(year != "1958")
+table_4= table_3 %>% filter(year != "2021")
+```
+
+```{r echo=FALSE}
+print("Below line chart represents the musical diversity of given year as the number of unique songs that appeared in the Billboard Top 100 that year")
+
+#plotting the line graph
+ggplot(table_4) + 
+  geom_line(aes(x=year, y=musical_diversity))
+```
+
+## **Wrangling the Billboard Top 100**\|**Part C**
+
+```{r echo=FALSE}
+#taking countif on columns song & performer
+#arranging the count column in descending order
+#filtering out ten-week hit songs 
+ten_week_hit_songs=billboard %>% group_by(song,performer) %>% summarise(count = n())%>% arrange(desc(count)) %>% filter(count >= 10 )
+
+```
+
+```{r echo=FALSE}
+#taking countif on performer
+#arranging the count column in descending order
+#filtering out artists having at least 30 songs 
+artists_30_songs=ten_week_hit_songs %>% group_by(performer) %>% summarise(no_of_ten_week_hits = n())%>% arrange(desc(no_of_ten_week_hits))  %>% filter(no_of_ten_week_hits >= 30 )
+```
+
+```{r echo=FALSE}
+print ("Below bar plot represents 19 artists in U.S. musical history since 1958 who have had at least 30 songs that were ten-week hits")
+
+ggplot(artists_30_songs) + 
+  geom_col(aes(x=performer, y=no_of_ten_week_hits)) +
+  coord_flip()
+```
+
+## **Visual story telling part 1: green buildings**
+
+```{r warning=FALSE, echo=FALSE}
+df_green = read.csv(file= "data/greenbuildings.csv")
+
+```
+
+The excel guru had the following methodology -
+
+-   Removing the outliers i.e. buildings with less than 10% occupancy which resulted in median rent for non-green houses = \$25 , green houses = \$27.60 .
+
+-   The difference in rent per square foot is: \$2.60 which is resulting in an added revenue of \$650,000
+
+-   Now, the extra cost in \$5,000,000 for a green building certification and hence the cost can be recovered in approximately \~8 years, and then on, there will be a net profit of \$650,000 per year.
+
+Although the calculations look reasonable, there are a few things that the excel guru has missed which we can now take a look into:
+
+We are using median rent as we can see from the distribution that we have a right tail which will skew our mean.
+
+```{r echo=FALSE}
+#plotting the kernel density graph
+d <-density(df_green$Rent)
+plot(d, main='Distribution of Rent', col='salmon')
+```
+
+**Looking into house classes**
+
+[Class A Houses]{.underline}
+
+-   When we look into the proportion of Class A houses in non-green and green houses, we see that about 80% of the green houses are Class A as opposed to only \~35% in non-green houses
+
+-   There may be the case that the median rent for green-house are higher just because they have a higher proportion of Class A houses
+
+-   Let's look into the median rent for Class A houses
+
+    ```{r echo=FALSE}
+    # boxplot(df_green$Rent)
+    df_green %>% select(Rent, green_rating, class_a) %>%  
+      filter((green_rating == 1) & (class_a == 1)) %>% select(Rent) %>% boxplot(main='Boxplot of Rent for green rated buildings in Class A')
+
+    med = df_green %>% select(Rent, green_rating, class_a) %>%  
+      filter((green_rating == 1) & (class_a == 1)) %>% select(Rent)%>% mutate(med=median(Rent)) %>% select(med)
+
+    med[[1]][[1]]
+    ```
+
+    ```{r echo=FALSE}
+    # boxplot(df_green$Rent)
+    df_green %>% select(Rent, green_rating, class_a) %>%  
+      filter((green_rating == 0) & (class_a == 1)) %>% select(Rent) %>% boxplot(main='Boxplot of Rent for non-green rated buildings in Class A')
+
+    med = df_green %>% select(Rent, green_rating, class_a) %>%  
+      filter((green_rating == 0) & (class_a == 1)) %>% select(Rent)%>% mutate(med=median(Rent)) %>% select(med)
+
+    med[[1]][[1]]
+    ```
+
+    -   Class A Overall : 28.2
+
+    -   Class A \| Green: 28.44
+
+    -   Class A \| Non-Green: 28.2
+
+    -   As we can see that, the rent of Class A houses does not depend on whether the house is green rating certified or not
+
+    -   So, if we compare a Class A non-green house and a Class A green house, there isn't much difference in rent; only 0.2 per square feet i.e. just \$50,000 extra premium per year
+
+[Class B Houses]{.underline}
+
+-   Let's look into the median rent for Class B houses
+
+    ```{r echo=FALSE}
+
+    df_green %>% select(Rent, green_rating, class_b) %>%  
+      filter((green_rating == 1) & (class_b == 1)) %>% select(Rent) %>% boxplot(main='Boxplot of Rent for green rated buildings in Class B')
+
+    med = df_green %>% select(Rent, green_rating, class_b) %>%  
+      filter((green_rating == 1) & (class_b == 1)) %>% select(Rent)%>% mutate(med=median(Rent)) %>% select(med)
+
+    med[[1]][[1]]
+    ```
+
+    ```{r echo=FALSE}
+    df_green %>% select(Rent, green_rating, class_b) %>%  
+      filter((green_rating == 0) & (class_b == 1)) %>% select(Rent) %>% boxplot(main='Boxplot of Rent for non-green rated buildings in Class B')
+
+    med = df_green %>% select(Rent, green_rating, class_b) %>%  
+      filter((green_rating == 0) & (class_b == 1)) %>% select(Rent)%>% mutate(med=median(Rent)) %>% select(med)
+
+    med[[1]][[1]]
+    ```
+
+    -   Class B Overall : 24.0
+
+    -   Class B \| Green: 25.1
+
+    -   Class B \| Non-Green: 24.0
+
+    -   As we can see that the rent for Class B Green house is slightly higher than Class B non-green house, i.e. \~1.1 higher rent per square feet, which translates to \~275,000 extra premium per year.
+
+    -   If there is \$5,000,000 extra cost for green certification, at 90% occupancy rate, it might take about 20 years to break even, and then the building can earn \~275,000 extra premium per year.
+
+[Class C Houses]{.underline}
+
+Looking into Class C houses rent for green houses, we see that the rent for green building Class C houses are more than Class A and B which does not make sense. This might be due to very few green buildings belonging to Class C and hence we cannot rely on the median/ mean rent.
+
+***Overall, based on house class, if we compare Class A houses, then there isn't any cost benefit in getting a green building certification.***
+
+***For Class B houses,*** ***there is some cost benefit but again, it'll take \~20 years to break even and does not sound like a very viable option. But again, it depends on the builder if for them a time span of 20 years sound economically viable.***
+
+**Looking into Amenities**
+
+Since, \~75% of green rated buildings have good amenities (amenities=1), let's compare the median rent amongst such buildings by class.
+
+Class A buildings with amenities:
+
+```{r echo=FALSE}
+df_green %>% select(Rent, green_rating, class_a, amenities) %>%  
+  filter((green_rating == 1) & (class_a == 1) & (amenities == 1)) %>% select(Rent) %>% boxplot(main='Boxplot of Rent for green rated buildings in Class A with amenities')
+
+med = df_green %>% select(Rent, green_rating, class_a, amenities) %>%  
+  filter((green_rating == 1) & (class_a == 1) & (amenities == 1)) %>% select(Rent)%>% mutate(med=median(Rent)) %>% select(med)
+
+med[[1]][[1]]
+```
+
+```{r echo=FALSE}
+df_green %>% select(Rent, green_rating, class_a, amenities) %>%  
+  filter((green_rating == 0) & (class_a == 1) & (amenities == 1)) %>% select(Rent) %>% boxplot(main='Boxplot of Rent for non-green rated buildings in Class A with amenities')
+
+med = df_green %>% select(Rent, green_rating, class_a, amenities) %>%  
+  filter((green_rating == 0) & (class_a == 1) & (amenities == 1)) %>% select(Rent)%>% mutate(med=median(Rent)) %>% select(med)
+
+med[[1]][[1]]
+```
+
+-   Green: 28.2
+
+-   Non-Green: 27.73
+
+-   Here, we can see that the premium for green building isn't that much, only 0.43 per sq feet which translates to \~\$ 105,750 added premium in a year and will take the building \~47 years to break even
+
+Class B buildings with amenities:
+
+```{r echo=FALSE}
+df_green %>% select(Rent, green_rating, class_b, amenities) %>%  
+  filter((green_rating == 1) & (class_b == 1) & (amenities == 1)) %>% select(Rent) %>% boxplot(main='Boxplot of Rent for green rated buildings in Class B with amenities')
+
+med = df_green %>% select(Rent, green_rating, class_b, amenities) %>%  
+  filter((green_rating == 1) & (class_b == 1) & (amenities == 1)) %>% select(Rent)%>% mutate(med=median(Rent)) %>% select(med)
+
+med[[1]][[1]]
+```
+
+```{r echo=FALSE}
+df_green %>% select(Rent, green_rating, class_b, amenities) %>%  
+  filter((green_rating == 0) & (class_b == 1) & (amenities == 1)) %>% select(Rent) %>% boxplot(main='Boxplot of Rent for non-green rated buildings in Class B with amenities')
+
+med = df_green %>% select(Rent, green_rating, class_b, amenities) %>%  
+  filter((green_rating == 0) & (class_b == 1) & (amenities == 1)) %>% select(Rent)%>% mutate(med=median(Rent)) %>% select(med)
+
+med[[1]][[1]]
+```
+
+-   Green: 24.46
+
+-   Non-Green: 23.89
+
+-   Here, we can see that the premium for green building isn't that much, only 0.51 per sq feet which translates to \~\$ 128,250 added premium in a year and will take the building \~39 years to break even
+
+**Hence based on our analysis and looking into House class, amenities etc. we can see that there isn't much premium for buildings with green rating. In nutshell, we can say that green building status isn't the only factor that is contributing to the "extra perceived" rent when we compare green buildings and non-green buildings, and hence we need to consider all the variables to make an informed estimate for the same.**
+
+## **Visual story telling part 2: Capital Metro data**
+
+```{r warning=FALSE, echo=FALSE}
+df_cap_metro = read.csv(file="data/capmetro_UT.csv")
+```
+
+Let's look into how the the boarding varies by each day...
+
+As you can see from the chart below is that traffic during Saturday and Sunday is very low as compared to weekdays which makes sense as since classes are not conducted during weekends, less students are near the UT area and hence the lower traffic.
+
+```{r warning=FALSE, echo=FALSE}
+suppressMessages(library(ggplot2))
+ggplot(df_cap_metro) + 
+  geom_col(aes(x=day_of_week, y=boarding)) 
+```
+
+Now lets's observe if the traffic varies by the time of day (all days combined)...
+
+From the graph below, we can see high traffic during 2PM to 6PM, and highest traffic during 3PM to 5PM which makes sense as students return from campus during 3-5 PM the most. Post 6PM the traffic tapers off as less and less students are near the campus area.
+
+```{r warning=FALSE, echo=FALSE}
+ggplot(df_cap_metro) + 
+  geom_col(aes(x=hour_of_day, y=boarding)) 
+```
+
+Now let's look into the traffic by hours during the weekdays...
+
+```{r warning=FALSE, echo=FALSE}
+
+df_weekday <- df_cap_metro[df_cap_metro$day_of_week %in% c("Mon","Tue",'Wed',"Thu","Fri"),]
+
+
+ggplot(df_weekday) + 
+  geom_col(aes(x=hour_of_day, y=boarding)) 
+
+
+```
+
+If we look into the traffic during only weekends, we can see that the traffic is more or less the same from 10 AM to 6PM (overall traffic much lower than weekdays), which makes sense as there are no classes, so there aren't any peak hours as such and the traffic is consistent across hours.
+
+```{r warning=FALSE, echo=FALSE}
+df_weekday <- df_cap_metro[df_cap_metro$day_of_week %in% c("Sat","Sun"),]
+
+ggplot(df_weekday) + 
+  geom_col(aes(x=hour_of_day, y=boarding)) 
+```
+
+Now, let's check if there is any relation b/w traffic and temperature.
+
+From the scatter plot we can see there is no clear trend b/w temperature and traffic in the UT area. I guess because you have to attend class irrespective of the temperature.
+
+```{r warning=FALSE, echo=FALSE}
+p <- ggplot(df_cap_metro, aes(temperature, boarding), col='blue') + geom_point()
+
+p
+```
+
+Now lets' check if the traffic changes by months...
+
+Form the plot below, we can see that there is slightly higher traffic during October.
+
+```{r warning=FALSE, echo=FALSE}
+ggplot(df_cap_metro) + 
+  geom_col(aes(x=month, y=boarding)) 
+```
+
+## **Portfolio modeling**
+
+We have created 2 portfolios using the \$100,00 and assessed the performance in a span of 20 days using the bootstrap re sampling. Additionally, we have assumed that our portfolio is re balanced each day at zero transaction cost.
+
+**Portfolio 1:**
+
+The first portfolio that we have is slightly conservative i.e. low risk and low return which comprises of 5 large cap stocks with equal distribution. We have 3 stocks from Pharama giants i.e. Pfizer, Novartis and Johnson & Johnson, and two large cap funds, Nestle and JP Morgan & Chase. The idea is to select strong companies which are less likely to fall to create a conservative portfolio.
+
+Below is the profit simulation using bootstrap re-sampling.
+
+We got a expected (mean) return of \$950 and we are 95% confident that our loss in 20 day period won't exceed \$6,834 i.e our VaR at 5%.
+
+```{r warning=FALSE, echo=FALSE}
+suppressMessages(library(mosaic))
+suppressMessages(library(quantmod))
+suppressMessages(library(foreach))
+
+
+### creating portfolio 1: 
+
+
+## all the variables defined here
+
+mystocks = c("JPM", "JNJ", "NVS","NSRGY","PFE")
+weights = c(0.2,0.2,0.2,0.2,0.2)
+myprices = getSymbols(mystocks, from = "2017-08-12")
+initial_wealth = 100000
+n_days = 20
+
+##
+
+## processing the last 5 years of return
+for(ticker in mystocks) {
+  expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+  eval(parse(text=expr))
+}
+
+
+all_returns = cbind(	ClCl(JPMa),
+                     ClCl(JNJa),
+                     ClCl(NVSa),
+                     ClCl(NSRGYa),
+                     ClCl(PFEa)
+                     )
+
+all_returns = as.matrix(na.omit(all_returns))
+##
+
+## running the simlation 10000 times
+sim1 = foreach(i=1:10000, .combine='rbind') %do% {
+	
+  total_wealth = initial_wealth
+
+	holdings = weights * total_wealth
+	
+	wealthtracker = rep(0, n_days)
+	
+	for(today in 1:n_days) {
+	  
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		
+		#added code to redistribute wealth at end of each day (not sure)	
+		holdings_total = sum(holdings)
+		holdings  = weights*holdings_total
+		#
+		
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+	}
+	wealthtracker
+}
+##
+
+## results
+#hist(sim1[,n_days], 25)
+
+# Profit/loss
+mean_profit = mean(sim1[,n_days] - initial_wealth)
+#
+
+# 5% value at risk:
+var_value = quantile(sim1[,n_days]- initial_wealth, prob=0.05)
+#
+
+#plotting the histogram
+hist(sim1[,n_days]- initial_wealth, breaks=30, col='slategray1', main = 'Simulation' , xlab = 'Profit or Loss')
+abline(v = quantile(sim1[,n_days]- initial_wealth, prob=0.05) , col = 'salmon', lty=2, lwd = 2)
+#
+
+
+
+```
+
+**Portfolio 2:**
+
+Our 2nd portfolio is a bit more risky, with relatively high risk and high return compared to the first portfolio.
+
+We have a mix of large and mid cap funds from different industries such as banking, entertainment , oil & gas which is exposing us to a variety of risks and market trends. Below is our portfolio and \$100,000 is equally distributed amongst these stocks.
+
+ASML -\> ASML Holding N.V.
+
+GS-\> Goldman Sachs Group Inc.
+
+MTDR-\> Matador Resources Company
+
+AX-\> Axos Financial Inc
+
+CZR-\> Caesars Entertainment, Inc.
+
+Below is the profit simulation using bootstrap re-sampling.
+
+We got a expected (mean) return of \$2,727 and we are 95% confident that our loss in 20 day period won't exceed \$15,697 i.e our VaR at 5%.
+
+```{r warning=FALSE, echo=FALSE}
+
+### creating portfolio 2: 
+
+
+## all the variables defined here
+
+mystocks = c("ASML", "GS", "MTDR", "AX","CZR")
+weights = c(0.2,0.2,0.2,0.2,0.2)
+myprices = getSymbols(mystocks, from = "2017-08-12")
+initial_wealth = 100000
+n_days = 20
+
+##
+
+## processing the last 5 years of return
+for(ticker in mystocks) {
+  expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+  eval(parse(text=expr))
+}
+
+
+all_returns = cbind(	ClCl(ASMLa),
+                     ClCl(GSa),
+                     ClCl(MTDRa),
+                     ClCl(AXa),
+                     ClCl(CZRa)
+                     )
+
+all_returns = as.matrix(na.omit(all_returns))
+##
+
+## running the simlation 10000 times
+sim1 = foreach(i=1:10000, .combine='rbind') %do% {
+	
+  total_wealth = initial_wealth
+
+	holdings = weights * total_wealth
+	
+	wealthtracker = rep(0, n_days)
+	
+	for(today in 1:n_days) {
+	  
+		return.today = resample(all_returns, 1, orig.ids=FALSE)
+		
+		#added code to redistribute wealth at end of each day (not sure)	
+		holdings_total = sum(holdings)
+		holdings  = weights*holdings_total
+		#
+		
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker[today] = total_wealth
+	}
+	wealthtracker
+}
+##
+
+## results
+#hist(sim1[,n_days], 25)
+
+# Profit/loss
+mean_profit = mean(sim1[,n_days] - initial_wealth)
+#
+
+# 5% value at risk:
+var_value = quantile(sim1[,n_days]- initial_wealth, prob=0.05)
+#
+
+#plotting the histogram
+hist(sim1[,n_days]- initial_wealth, breaks=30, col='slategray1', main = 'Simulation' , xlab = 'Profit or Loss')
+abline(v = quantile(sim1[,n_days]- initial_wealth, prob=0.05) , col = 'red', lty=2, lwd = 2)
+#
+
+```
+
+## **Clustering and PCA**
+
+```{r echo=FALSE}
+rm(list=ls())
+suppressWarnings(library(ggplot2))
+suppressWarnings(library(foreach))
+suppressWarnings(library(mosaic))
+suppressWarnings(library(reshape))
+suppressWarnings(library(purrr))
+suppressWarnings(library(data.table))
+suppressWarnings(library(RColorBrewer))
+```
+
+
+```{r echo=FALSE}
+sm <- read.csv("data/social_marketing.csv", header=TRUE,  row.names="X")
+summary(sm)
+```
+
+No missing values/ null values were observed in any of the features.
+
+```{r echo=FALSE}
+#checking for missing/null values
+
+nc <- t(as.data.frame(lapply(sm,function(x) {length(which(is.na(x)))})))
+# nc
+```
+
+The following box plots help us to get a sense of the outliers and of there is a lot of variation in the feature. In case of high variance, features may not help in explaining the variability of the dependent variable.
+
+```{r echo=FALSE}
+par(mfrow=c(3,3))
+for(i in 2:ncol(sm)){
+  boxplot(sm[,i], main = colnames(sm)[i])
+}
+```
+
+From the below heatmap to understand bi-variate relations, we can infer that only few features have a correlation higher than 0.5
+
+```{r echo=FALSE}
+# melted_cormat
+cormat <- cor(sm[,-1])
+melted_cormat <- melt(cormat)
+ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+geom_tile(color = "white")+
+  scale_fill_gradient2(low = "yellow", high = "red", mid = "orange", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Pearson\nCorrelation") +
+  theme_minimal()+ 
+  
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, 
+                                   size = 12, hjust = 1))+
+  coord_fixed()
+
+cormat2 <- melted_cormat[melted_cormat$Var1 != melted_cormat$Var2 & melted_cormat$value>0.6 , ]
+```
+
+Dropping the "uncategorised" and "chatter" features as they will not reflect the customers' behavior and are rather a function of the annotators work
+
+```{r echo=FALSE}
+sm_1 <- subset(sm, select = -c(uncategorized,chatter))
+```
+
+As we have a large number of features and \~8K data points, we choose to go ahead with K means clustering. To decide the number of clusters, we are plotting the WSS at different number of clusters ranging from 2 to 15.
+
+We see a clear elbow at K=6, thus we will use this to run the K-Means model
+
+```{r echo=FALSE}
+set.seed(420)
+
+# function to compute total within-cluster Sum of squared errors 
+wss <- function(k) {
+  kmeans(sm_1[,-1], k, nstart = 25 )$tot.withinss
+}
+
+# Compute for clusters 2-15
+k <- 2:15
+
+# Plot WSS
+wss_values <- map_dbl(k, wss)
+plot(k, wss_values,
+       type="b", pch = 19, frame = FALSE, 
+       xlab="Number of clusters K",
+       ylab="Total within-clusters sum of squares")
+
+```
+
+```{r echo=FALSE}
+# Center and scale the data
+X1 = sm_1
+X2 = scale(X1, center=TRUE, scale=TRUE)
+
+# Extract the centers and scales from the rescaled data (which are named attributes)
+mu = attr(X2,"scaled:center")
+sigma = attr(X2,"scaled:scale")
+```
+
+Plotting the clusters on a 2D plot to understand behavior is not possible due to the sheer number of features.
+
+```{r echo=FALSE}
+# Run k-means with 6 clusters and 25 starts
+clust1 = kmeans(X2, 6, nstart=25)
+
+# qplot is in the ggplot2 library
+qplot(travel, family, data=sm_1, color=factor(clust1$cluster))
+qplot(cooking, music, data=sm_1, color=factor(clust1$cluster))
+```
+
+Here, we are plotting the difference between the mean of the population and the mean of each cluster to understand how the behavioral characteristics of the cluster differ from the complete population and set the cluster population apart from the population.
+
+```{r echo=FALSE}
+set.seed(420)
+
+sm_1$cluster_num <- kmeans(X2, 6, nstart = 25, trace=FALSE)$cluster
+
+clus_summ <- as.data.table(sm_1)[,by=cluster_num, lapply(.SD, function(x) mean(x,na.rm=T))]
+
+clus_summ$cluster_num <- NULL
+
+heatmap(as.matrix(clus_summ), main = 'Cluster Means wrt population mean' , xlab = 'Features', ylab = 'Clusters_Segments' , col= colorRampPalette(brewer.pal(8, "Blues"))(25) )
+```
+
+Below are the key observations for the 6 clusters formed -
+
+1)  Older People with families - Food, Religion, Parenting, Sports Fandom
+
+2)  Tech and News enthusiasts, possibly people in late 20s or 30s - Politics, Travel, News, Automotive, Computers
+
+3)  Younger crowd/ Highly Active Social media users - Cooking, Beauty, Fashion, Photo sharing
+
+4)  Health and Fitness Enthusiasts - Outdoors, Health Nutrition, Personal Fitness
+
+5)  College students - Sports_Playing, College_Uni, Online_Gaming
+
+6)  No clear segment description - Photo Sharing is the most dominant feature. Other features that are slightly above mean are : current events, shopping, tv_films, college_uni, travel, politics
+
+## **Market segmentation**
+
+```{r echo=FALSE}
+suppressMessages(library(psych))
+suppressMessages(library(ggplot2))
+suppressMessages(library(ClusterR))
+```
+
+
+```{r echo=FALSE}
+wine <- read.csv('data/wine.csv', header=TRUE)
+```
+
+```{r echo=FALSE}
+head(wine)
+```
+
+```{r echo=FALSE}
+dim(wine)
+```
+
+```{r echo=FALSE}
+colnames(wine)
+```
+
+The below pairwise plots help understand the bi-variate relation between the available X variables.
+
+```{r echo=FALSE}
+pairs(wine[, c("fixed.acidity","volatile.acidity", "citric.acid","residual.sugar","chlorides", "free.sulfur.dioxide","total.sulfur.dioxide","density","pH","sulphates","alcohol")])
+```
+
+```{r echo=FALSE}
+pairs.panels(wine[, c("fixed.acidity","volatile.acidity", "citric.acid","residual.sugar","chlorides", "free.sulfur.dioxide","total.sulfur.dioxide","density","pH","sulphates","alcohol")],
+             gap = 0,pch=21)
+```
+
+High covariance between X variables helps in achieving better Principal Components. Below table help us understand the same.
+
+```{r echo=FALSE}
+cov(wine[, c("fixed.acidity","volatile.acidity", "citric.acid","residual.sugar","chlorides", "free.sulfur.dioxide","total.sulfur.dioxide","density","pH","sulphates","alcohol")])
+```
+
+```{r echo=FALSE}
+pc <- prcomp(wine[, c("fixed.acidity","volatile.acidity", "citric.acid","residual.sugar","chlorides", "free.sulfur.dioxide","total.sulfur.dioxide","density","pH","sulphates","alcohol")],
+             center = TRUE,
+            scale. = TRUE) #, rank. = 7)
+```
+
+The below table helps us get a sense of the 11 Principal Components formed and the variability explained by them. We can see that the first 4 components can explain 73% variability in the data. After which each additional feature gives a lesser incremental value in variance explainability.
+
+```{r echo=FALSE}
+summary(pc)
+```
+
+```{r echo=FALSE}
+wine_pc <- predict(pc, wine)
+dim(wine_pc)
+```
+
+```{r echo=FALSE}
+wine_master <- data.frame(wine_pc,wine)
+wine_master[1:3,]
+```
+
+To get a visual sense of the the PCs and their differentiation of the Wine Color, we have plotted the below scatter plot with PC1 and PC2 (Since they explain 50% variability). We can see a clear distinction between red and white wines.
+
+```{r echo=FALSE}
+ggplot(wine_master, aes(x=PC1, y=PC2, color=color)) +
+     geom_point()
+```
+
+However, no clear differentiation is observed in Wine Quality basis PC1 And PC2
+
+```{r echo=FALSE}
+ggplot(wine_master, aes(x=PC1, y=PC2, color=quality)) +
+     geom_point()
+
+```
+
+K-Means Clustering
+
+We are running the K-Means clustering model with all the available features.
+
+```{r echo=FALSE}
+X = wine[, c("fixed.acidity","volatile.acidity", "citric.acid","residual.sugar","chlorides", "free.sulfur.dioxide","total.sulfur.dioxide","density","pH","sulphates","alcohol")]
+
+X = scale(X, center=TRUE, scale=TRUE)
+```
+
+```{r echo=FALSE}
+mu = attr(X,"scaled:center")
+sigma = attr(X,"scaled:scale")
+```
+
+We start with using K=2 to identify clusters that can group Red and White wines separately.
+
+```{r echo=FALSE}
+clust1 = kmeans(X, 2, nstart=25)
+```
+
+```{r echo=FALSE}
+clust1$center 
+clust1$center[1,]*sigma + mu
+clust1$center[2,]*sigma + mu
+```
+
+The below confusion matrix indicates that we are predicting wine color with 99% accuracy.
+
+```{r echo=FALSE}
+clust_data = as.data.frame(clust1$cluster)
+colnames(clust_data)[1] = "cluster"
+clust_data = transform(clust_data, cluster = as.numeric(cluster))
+wine['cluster'] = clust_data['cluster']
+wine_clust_table = table(Cluster = wine$cluster, Color = wine$color)
+wine_clust_table
+```
+
+```{r echo=FALSE}
+cluster_accuracy = round(100*(wine_clust_table[1,1] + wine_clust_table[2,2]) / nrow(wine))
+cluster_accuracy
+```
+
+The below scatter plot is showing an example plotted on 2 of the features, where we can see a clear distinction between red and white wine
+
+```{r echo=FALSE}
+ggplot(data=wine, mapping = aes(sulphates, total.sulfur.dioxide, color=factor(clust1$cluster), shape = color)) +
+    geom_point() +
+    scale_color_manual(values=c("blue", "red")) + 
+    theme_light() +
+    labs(y = "Total Sulfur Dioxide", x = "Sulphates", title = "Wine Clustering on Sulphate and Total Sulfur Dioxide Plane")
+```
+
+```{r echo=FALSE}
+clust2 = kmeans(X, 7, nstart=20)
+```
+
+Now, we are running a model with K=7 to try and form clusters that will indicate Wine quality groups.
+
+```{r echo=FALSE}
+clust2$center 
+clust2$center[1,]*sigma + mu
+clust2$center[2,]*sigma + mu
+clust2$center[3,]*sigma + mu
+clust2$center[4,]*sigma + mu
+clust2$center[5,]*sigma + mu
+clust2$center[6,]*sigma + mu
+clust2$center[7,]*sigma + mu
+```
+
+```{r echo=FALSE}
+ggplot(data=wine, mapping = aes(sulphates, total.sulfur.dioxide, color=factor(clust2$cluster), shape = cluster)) +
+    geom_point() +
+    scale_color_manual(values=c('3','4','5','6','7','8','9')) + 
+    theme_light() +
+    labs(y = "Total Sulfur Dioxide", x = "Sulphates", title = "Wine Clustering on Sulphate and Total Sulfur Dioxide Plane")+ scale_shape_identity()
+```
+
+Wine Color -
+
+1)  PCA - We can easily conclude that wine color can be differentiated basis PCA.
+
+2)  K-means - This as well gives us good results which can be concluded from the Confusion matrix as a 99% accuracy is achieved.
+
+Wine Quality -
+
+1)  PCA - PCA fails to give us a clear distinction between the 7 wine quality ratings available (As seen in the plot above)
+
+2)  K Means - The plot above indicates that clusters are overlapping one another thus it is not possible to differentiate between the clusters. Also, confusion matrix cannot be created here since, we cannot map the Wine Quality ratings to the clusters as K-means gives clusters without labels.
+
+## **The Reuters corpus**
+
+For this problem we will be identifying authorship of documents using classification. We will use a Naive Bayes classification initially and then try to improve the accuracy using alternative methods.
+
+```{r Reuters corpus, warning=FALSE, echo=FALSE}
+# Importing libraries
+rm(list=ls()) 
+suppressMessages(library(tidyverse))
+suppressMessages(library(foreach))
+suppressMessages(library(tm))
+suppressMessages(library(magrittr))
+suppressMessages(library(e1071))
+suppressMessages(library(caret))
+suppressMessages(library(doParallel))
+suppressMessages(library(randomForest))
+suppressMessages(library(gdata))
+
+
+# taken from Prof Scotts' gist (required to read the reuters dataset)
+readerPlain = function(fname){
+				readPlain(elem=list(content=readLines(fname)), 
+							id=fname, language='en') }
+
+
+```
+
+***Reading the TRAIN DATA into a corpus***
+
+```{r Reading corpus - Train data, warning=FALSE}
+# code taken from Prof Scott's R file
+author_dirs = Sys.glob('data/ReutersC50/C50train/*')
+
+file_list = NULL
+labels = NULL
+for(author in author_dirs) {
+	author_name = substring(author, first=26)
+	files_to_add = Sys.glob(paste0(author, '/*.txt'))
+	file_list = append(file_list, files_to_add)
+	labels = append(labels, rep(author_name, length(files_to_add)))
+}
+
+all_docs = lapply(file_list, readerPlain) 
+
+
+names(all_docs) = all_docs
+names(all_docs) = sub('.txt', '', names(all_docs))
+
+
+# creating the train corpus from all the files in train folder
+train_Corpus = Corpus(VectorSource(all_docs))
+
+
+
+# Preprocessing (removing stop words, numbers, white spaces and converting to lower)
+train_Corpus = tm_map(train_Corpus, content_transformer(tolower)) # make everything lowercase
+train_Corpus = tm_map(train_Corpus, content_transformer(removeNumbers)) # remove numbers
+train_Corpus = tm_map(train_Corpus, content_transformer(removePunctuation)) # remove punctuation
+train_Corpus = tm_map(train_Corpus, content_transformer(stripWhitespace)) ## remove excess white-space
+train_Corpus = tm_map(train_Corpus, content_transformer(removeWords), stopwords("SMART"))
+
+
+#creating the document term matrix using tfidf weighting for normalization
+DTM_train = DocumentTermMatrix(train_Corpus,control=list(weighting=weightTfIdf, bounds = list(global = c(5, Inf))))
+                               
+DTM_train = removeSparseTerms(DTM_train, 0.95)
+
+DTM_train = as.matrix(DTM_train)
+DTM_train = as.data.frame(DTM_train)
+```
+
+***Reading the TEST DATA into a corpus***
+
+```{r Reading corpus -  TEST data, warning=FALSE}
+author_dirs = Sys.glob('data/ReutersC50/C50test/*')
+file_list = NULL
+test_labels = NULL
+author_names = NULL
+for(author in author_dirs) {
+  author_name = substring(author, first=25)
+  author_names = append(author_names, author_name)
+  files_to_add = Sys.glob(paste0(author, '/*.txt'))
+  file_list = append(file_list, files_to_add)
+  test_labels = append(test_labels, rep(author_name, length(files_to_add)))
+}
+all_docs = lapply(file_list, readerPlain) 
+names(all_docs) = file_list
+names(all_docs) = sub('.txt', '', names(all_docs))
+
+# performing a similar preprocessing as train
+test_corpus = Corpus(VectorSource(all_docs))
+test_corpus = tm_map(test_corpus, content_transformer(tolower))
+test_corpus = tm_map(test_corpus, content_transformer(removeNumbers))
+test_corpus = tm_map(test_corpus, content_transformer(removePunctuation))
+test_corpus = tm_map(test_corpus, content_transformer(stripWhitespace))
+test_corpus = tm_map(test_corpus, content_transformer(removeWords), stopwords("en"))
+
+# creating document term matrix for test using tfidf weighting
+DTM_test = DocumentTermMatrix(test_corpus, control=list(weighting=weightTfIdf, bounds = list(global = c(5, Inf))))
+DTM_test = removeSparseTerms(DTM_test, 0.95)
+DTM_test = as.matrix(DTM_test)
+DTM_test = as.data.frame(DTM_test)
+
+```
+
+***Naive Bayes for predicting authorship***
+
+```{r Reading TEST data, warning=FALSE}
+set.seed(007)
+# correcting train and test labels - removing any unwanted file 
+# paths from the name of authors
+labels = sapply(str_split(labels, '/'), tail, 1)
+test_labels = sapply(str_split(test_labels, '/'), tail, 1)
+
+DTM_train = cbind(DTM_train,labels)
+DTM_test = cbind(DTM_test,test_labels)
+
+nB = naiveBayes(as.factor(labels)~., data=DTM_train)
+nB_predictions = predict(nB, DTM_test[,-ncol(DTM_test)], type="class")
+
+
+predicted_labels= factor(as.numeric(as.factor(nB_predictions)), levels=1:50)
+
+obs_labels = factor(as.numeric(as.factor(DTM_test$test_labels)),levels=1:50)
+
+caret::confusionMatrix(obs_labels, predicted_labels)$overall['Accuracy']
+# the overall accuracy is 40.2% for naive bayes
+
+
+# calculating the best a worst predictions by naive bayes
+cfm = caret::confusionMatrix(obs_labels, predicted_labels)
+acc = as.tibble(cfm$byClass)
+min_idx = which.min(acc$`Balanced Accuracy`)
+max_idx = which.max(acc$`Balanced Accuracy`)
+
+
+DTM_test$test_labels[as.numeric(as.factor(DTM_test$test_labels)) == min_idx][1]
+# the worst predicted author is JaneMacartney
+min(acc$`Balanced Accuracy`) 
+# with minimum accuracy of 52.40%
+
+
+DTM_test$test_labels[as.numeric(as.factor(DTM_test$test_labels)) == max_idx][1]
+# the best predicted author is JimGilchrist
+max(acc$`Balanced Accuracy`)
+# with maximum accuracy of 96.22%
+```
+
+We will try to improve this accuracy using random forest
+
+***Random Forest for predicting authorship***
+
+```{r rfm, warning=FALSE}
+set.seed(007)
+registerDoParallel(cores = 6)
+testTrees = c(10,50,75,100,200,400)
+TreeClass = foreach( i = 1:length(testTrees),.combine = 'c') %dopar%
+{
+   model_RF = randomForest::randomForest(x=DTM_train[,!(colnames(DTM_train) == "labels")], y=as.factor(labels),ntree = testTrees[i])
+  pred_RF = predict(model_RF, data=DTM_test[,!(colnames(DTM_test) == "test_labels")])
+  # print(pred_RF)
+  predicted_labels= factor(as.numeric(pred_RF),levels=1:51)
+  obs_labels = factor(as.numeric(as.factor(DTM_test$test_labels)),levels=1:51)
+  caret::confusionMatrix(obs_labels, predicted_labels)$overall['Accuracy']
+}
+
+print(TreeClass)
+# 400 trees fetch an overall accuracy of >75% therefore we train random forest on 400 trees.
+
+model_RF = randomForest::randomForest(x=DTM_train[,!(colnames(DTM_train) == "labels")], y=as.factor(labels),ntree = 400)
+
+pred_RF = predict(model_RF, data=DTM_test[,!(colnames(DTM_test) == "test_labels")])
+
+predicted_labels= factor(as.numeric(pred_RF),levels=1:50)
+
+
+obs_labels = factor(as.numeric(as.factor(DTM_test$test_labels)),levels=1:50)
+
+caret::confusionMatrix(obs_labels, predicted_labels)$overall['Accuracy']
+# the overall accuracy is 77.96% for RFM with 400 trees
+
+# calculating the best a worst predictions by naive bayes
+cfm = caret::confusionMatrix(obs_labels, predicted_labels)
+acc = as.tibble(cfm$byClass)
+min_idx = which.min(acc$`Balanced Accuracy`)
+max_idx = which.max(acc$`Balanced Accuracy`)
+
+DTM_test$test_labels[as.numeric(as.factor(DTM_test$test_labels)) == min_idx][1]
+# the worst predicted author is ScottHillis
+min(acc$`Balanced Accuracy`) 
+# with minimum accuracy of 70.12%
+
+
+DTM_test$test_labels[as.numeric(as.factor(DTM_test$test_labels)) == max_idx][1]
+# the best predicted author is AlanCrosby
+max(acc$`Balanced Accuracy`)
+# with maximum accuracy of 97.56%
+
+# The accuracy for JaneMacartney (which was 52.40% in Naive Bayes) has increased significantly to 78.85%, showing us that RFM is a better predictor for the overall set of authors
+fac = factor(DTM_test$test_labels)
+acc$`Balanced Accuracy`[mapLevels(x=fac)['JaneMacartney'][[1]]]
+
+
+# This could be improved even more if we tune for parameters like max depth, or mtry(number of columns) in the random forest iteration
+```
+
+## **Association rule mining**
+
+Reading the grocery transaction level data and getting the summary
+
+```{r echo=FALSE}
+rm(list = ls())
+suppressMessages(library(tidyverse))
+suppressMessages(library(igraph))
+suppressMessages(library(arules))
+suppressMessages(library(arulesViz))
+
+
+grocery_df = read.transactions("data/groceries.txt",sep=',',format="basket",rm.duplicates=TRUE)
+
+summary(grocery_df)
+
+```
+
+The most frequent items being bought are whole milk, other vegetables, rolls/buns, soda and yogurt
+
+```{r echo=FALSE}
+grocery_df
+
+itemFrequencyPlot(grocery_df, topN=10, type='absolute')
+```
+
+The top item purchased was whole milk with about 2,500 of the 9,836 transactions in the basket
+
+```{r echo=FALSE}
+groc_rules<- apriori(grocery_df, 
+                      parameter=list(support=.002, confidence=0.75))
+inspect(groc_rules[1:5])
+
+summary(groc_rules)
+```
+
+We need a very low support (of 0.002) and a relatively low confidence (of 0.75) for apriori to learn association rules. This iteration gives us 39 rules.
+
+```{r echo=FALSE}
+plot(groc_rules, jitter=0)
+
+```
+
+This plot shows high lift rules have lower support and confidence. Subsetting for lift greater than 4 gives use the following
+
+```{r echo=FALSE}
+
+inspect(subset(groc_rules,subset=lift >= 4))
+
+```
+
+This shows that people generally tend to buy milk, fruits yogurt and vegetables together.
+
+```{r echo=FALSE}
+plot(head(sort(groc_rules, by="lift"), 20),
+  method="graph", control=list(cex=.9))
+
+```
+
+The plot reinforces the statement we make earlier that people tend to buy veggies, fruits and dairy products together.
+
+We can assume the following based on the association rule model:
+
+1.  Whole Milk, yogurt and fruit and vegetable juices occur with high confidence indicating that people are probably buying these things together to make nutritious smoothies.
+2.  root vegetables and fruits occur with other vegetables indicating that people tend to make conscious nutritious choices.
+3.  citrus fruits and tropical fruits occur together, suggesting that people are preferring fruits that are native to hot and humid climates (tropical countries).
+4.  whole milk is associated with other vegetables majority of time with lift\>4 indicating that there is 4 times a chance of people buying other vegetables when they buy whole milk.
